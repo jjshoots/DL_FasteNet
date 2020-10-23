@@ -7,7 +7,6 @@ import torch.nn.functional as func
 class FasteNet(nn.Module):
     def __init__(self):
         super().__init__()
-
         self.layer1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, padding=1)
         self.layer2 = nn.MaxPool2d(kernel_size=2)
         self.batch_norm1 = nn.BatchNorm2d(num_features=32)
@@ -27,6 +26,7 @@ class FasteNet(nn.Module):
         self.batch_norm7 = nn.BatchNorm2d(num_features=128)
         self.layer11 = nn.Conv2d(in_channels=128, out_channels=1, kernel_size=3, padding=1)
         self.output_layer = nn.Sigmoid()
+        self.threshold_layer = nn.Threshold(0.5, value=0)
 
     def forward(self, input):
         x = self.layer1(input)
@@ -48,4 +48,6 @@ class FasteNet(nn.Module):
         x = self.batch_norm7(x)
         x = self.layer11(x)
         x = self.output_layer(x)
+        x = self.threshold_layer(x)
+        x = torch.ceil(x)
         return x

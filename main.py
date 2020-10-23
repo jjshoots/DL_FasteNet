@@ -16,10 +16,14 @@ from FasteNet_Net import FasteNet
 
 # params
 DIRECTORY = os.path.dirname(__file__)
-DIRECTORY2 = 'C:\TEMP'
-VERSION_NUMBER = 1
-MARK_NUMBER = 49
+DIRECTORY2 = DIRECTORY # 'C:\TEMP'
+
+VERSION_NUMBER = 2
+MARK_NUMBER = 1
+
 BATCH_SIZE = 50
+
+THRESHOLD = 0.8
 
 # select device
 device = 'cpu'
@@ -86,7 +90,7 @@ loss_function = nn.MSELoss()
 optimizer = optim.SGD(FasteNet.parameters(), lr=0.001, momentum=0.9)
 
 #  start training
-for epoch in range(2000):
+for epoch in range(1000):
 
     running_loss = 0.0
 
@@ -138,3 +142,37 @@ for epoch in range(2000):
 
             # reset the running loss for the next n batches
             running_loss = 0.
+
+
+
+
+# FOR INFERENCING
+# FOR INFERENCING
+# FOR INFERENCING
+
+# set frames to render > 0 to perform inference
+frames_to_render = 0
+start_time = time.time()
+torch.no_grad()
+FasteNet.eval()
+
+# set to true for inference
+for _ in range(frames_to_render):
+    input = images[1].unsqueeze(0).unsqueeze(0).to(device)
+    output = FasteNet.forward(input)
+    
+    torch.cuda.synchronize()
+
+    # set to true to display images
+    if 0:
+        comparison = truths[1].unsqueeze(0).unsqueeze(0)
+        plt.imshow(input.squeeze().to('cpu').detach().numpy())
+        plt.show()
+        plt.imshow(comparison.squeeze().to('cpu').detach().numpy())
+        plt.show()
+        plt.imshow(output.squeeze().to('cpu').detach().numpy())
+        plt.show()
+
+end_time = time.time()
+duration = end_time - start_time
+print(f"Average FPS = {frames_to_render / duration}")
