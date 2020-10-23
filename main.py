@@ -6,7 +6,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as func
 import torchvision.transforms.functional as TF
 
 from PIL import Image
@@ -18,7 +17,7 @@ from FasteNet_Net import FasteNet
 # params
 DIRECTORY = os.path.dirname(__file__)
 VERSION_NUMBER = 1
-MARK_NUMBER = 1
+MARK_NUMBER = 49
 BATCH_SIZE = 50
 
 # select device

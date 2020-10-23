@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-import time
-import os
-
 import torch
 from torch._C import Size
 import torch.nn as nn
