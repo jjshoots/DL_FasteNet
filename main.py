@@ -87,10 +87,10 @@ print(F"Using weights file: {WEIGHT_FILE}")
 
 # set up loss function and optimizer
 loss_function = nn.MSELoss()
-optimizer = optim.SGD(FasteNet.parameters(), lr=0.001, momentum=0.9)
+optimizer = optim.SGD(FasteNet.parameters(), lr=0.0003, momentum=0.9)
 
 #  start training
-for epoch in range(1000):
+for epoch in range(0):
 
     running_loss = 0.0
 
@@ -151,7 +151,7 @@ for epoch in range(1000):
 # FOR INFERENCING
 
 # set frames to render > 0 to perform inference
-frames_to_render = 0
+frames_to_render = 1
 start_time = time.time()
 torch.no_grad()
 FasteNet.eval()
@@ -164,13 +164,19 @@ for _ in range(frames_to_render):
     torch.cuda.synchronize()
 
     # set to true to display images
-    if 0:
+    if 1:
         comparison = truths[1].unsqueeze(0).unsqueeze(0)
+        figure = plt.figure()
+        figure.add_subplot(3, 1, 1)
+        plt.title('Input Image')
         plt.imshow(input.squeeze().to('cpu').detach().numpy())
-        plt.show()
+        figure.add_subplot(3, 1, 2)
+        plt.title('Ground Truth')
         plt.imshow(comparison.squeeze().to('cpu').detach().numpy())
-        plt.show()
+        figure.add_subplot(3, 1, 3)
+        plt.title('Predictions')
         plt.imshow(output.squeeze().to('cpu').detach().numpy())
+
         plt.show()
 
 end_time = time.time()

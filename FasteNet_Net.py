@@ -26,7 +26,7 @@ class FasteNet(nn.Module):
         self.batch_norm7 = nn.BatchNorm2d(num_features=128)
         self.layer11 = nn.Conv2d(in_channels=128, out_channels=1, kernel_size=3, padding=1)
         self.output_layer = nn.Sigmoid()
-        self.threshold_layer = nn.Threshold(0.5, value=0)
+        self.threshold_layer = nn.Threshold(0.8, value=0)
 
     def forward(self, input):
         x = self.layer1(input)
