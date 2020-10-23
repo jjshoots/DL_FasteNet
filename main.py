@@ -16,6 +16,7 @@ from FasteNet_Net import FasteNet
 
 # params
 DIRECTORY = os.path.dirname(__file__)
+DIRECTORY2 = 'C:\TEMP'
 VERSION_NUMBER = 1
 MARK_NUMBER = 49
 BATCH_SIZE = 50
@@ -68,14 +69,14 @@ if 0:
 FasteNet = FasteNet().to(device)
 
 # get the latest pth file and use as weights
-WEIGHT_FILE = os.path.join(DIRECTORY, f'weights/Version{VERSION_NUMBER}/weights{MARK_NUMBER}.pth')
+WEIGHT_FILE = os.path.join(DIRECTORY2, f'weights/Version{VERSION_NUMBER}/weights{MARK_NUMBER}.pth')
 
 while os.path.isfile(WEIGHT_FILE):
     MARK_NUMBER += 1
-    WEIGHT_FILE = os.path.join(DIRECTORY, f'weights/Version{VERSION_NUMBER}/weights{MARK_NUMBER}.pth')
+    WEIGHT_FILE = os.path.join(DIRECTORY2, f'weights/Version{VERSION_NUMBER}/weights{MARK_NUMBER}.pth')
 
 MARK_NUMBER -= 1
-WEIGHT_FILE = os.path.join(DIRECTORY, f'weights/Version{VERSION_NUMBER}/weights{MARK_NUMBER}.pth')
+WEIGHT_FILE = os.path.join(DIRECTORY2, f'weights/Version{VERSION_NUMBER}/weights{MARK_NUMBER}.pth')
 
 FasteNet.load_state_dict(torch.load(WEIGHT_FILE))
 print(F"Using weights file: {WEIGHT_FILE}")
@@ -129,7 +130,7 @@ for epoch in range(2000):
                 # save the net
                 lowest_running_loss = running_loss.item()
                 MARK_NUMBER += 1
-                WEIGHT_FILE = os.path.join(DIRECTORY, f'weights/Version{VERSION_NUMBER}/weights{MARK_NUMBER}.pth')
+                WEIGHT_FILE = os.path.join(DIRECTORY2, f'weights/Version{VERSION_NUMBER}/weights{MARK_NUMBER}.pth')
                 torch.save(FasteNet.state_dict(), WEIGHT_FILE)
 
                 # print the weight file that we saved to
