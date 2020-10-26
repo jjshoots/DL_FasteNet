@@ -13,15 +13,17 @@ import matplotlib.pyplot as plt
 
 from ImageLoader import ImageLoader
 from FasteNet_Net import FasteNet
+from FasteNet_Net_Lite import FasteNet_Lite
+from FasteNet_Net_HyperLite import FasteNet_HyperLite
 
 # params
 DIRECTORY = os.path.dirname(__file__)
-DIRECTORY2 = DIRECTORY # 'C:\TEMP'
+DIRECTORY2 = DIRECTORY # 'C:\WEIGHTS'
 
 VERSION_NUMBER = 2
-MARK_NUMBER = 1
+MARK_NUMBER = 0
 
-BATCH_SIZE = 50
+BATCH_SIZE = 30
 
 THRESHOLD = 0.8
 
@@ -82,15 +84,16 @@ while os.path.isfile(WEIGHT_FILE):
 MARK_NUMBER -= 1
 WEIGHT_FILE = os.path.join(DIRECTORY2, f'weights/Version{VERSION_NUMBER}/weights{MARK_NUMBER}.pth')
 
-FasteNet.load_state_dict(torch.load(WEIGHT_FILE))
-print(F"Using weights file: {WEIGHT_FILE}")
+if MARK_NUMBER > 0:
+    FasteNet.load_state_dict(torch.load(WEIGHT_FILE))
+    print(F"Using weights file: {WEIGHT_FILE}")
 
 # set up loss function and optimizer
 loss_function = nn.MSELoss()
-optimizer = optim.SGD(FasteNet.parameters(), lr=0.0003, momentum=0.9)
+optimizer = optim.SGD(FasteNet.parameters(), lr=0.003, momentum=0.9)
 
 #  start training
-for epoch in range(0):
+for epoch in range(1000):
 
     running_loss = 0.0
 
@@ -151,10 +154,10 @@ for epoch in range(0):
 # FOR INFERENCING
 
 # set frames to render > 0 to perform inference
-frames_to_render = 1
-start_time = time.time()
 torch.no_grad()
 FasteNet.eval()
+frames_to_render = 0
+start_time = time.time()
 
 # set to true for inference
 for _ in range(frames_to_render):
