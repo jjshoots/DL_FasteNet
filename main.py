@@ -90,10 +90,10 @@ if MARK_NUMBER > 0:
 
 # set up loss function and optimizer
 loss_function = nn.MSELoss()
-optimizer = optim.SGD(FasteNet.parameters(), lr=0.003, momentum=0.9)
+optimizer = optim.SGD(FasteNet.parameters(), lr=0.001, momentum=0.9)
 
 #  start training
-for epoch in range(1000):
+for epoch in range(0):
 
     running_loss = 0.0
 
@@ -156,7 +156,7 @@ for epoch in range(1000):
 # set frames to render > 0 to perform inference
 torch.no_grad()
 FasteNet.eval()
-frames_to_render = 0
+frames_to_render = 1
 start_time = time.time()
 
 # set to true for inference
