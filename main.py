@@ -20,8 +20,8 @@ from FasteNet_Net_HyperLite import FasteNet_HyperLite
 DIRECTORY = os.path.dirname(__file__)
 DIRECTORY2 = DIRECTORY # 'C:\WEIGHTS'
 
-VERSION_NUMBER = 2
-MARK_NUMBER = 0
+VERSION_NUMBER = 4
+MARK_NUMBER = 385
 
 BATCH_SIZE = 30
 
@@ -72,7 +72,7 @@ if 0:
         user_input = input('Key in "Y" to end display, enter to continue...')
 
 # set up net
-FasteNet = FasteNet().to(device)
+FasteNet = FasteNet_HyperLite().to(device)
 
 # get the latest pth file and use as weights
 WEIGHT_FILE = os.path.join(DIRECTORY2, f'weights/Version{VERSION_NUMBER}/weights{MARK_NUMBER}.pth')
@@ -87,6 +87,8 @@ WEIGHT_FILE = os.path.join(DIRECTORY2, f'weights/Version{VERSION_NUMBER}/weights
 if MARK_NUMBER > 0:
     FasteNet.load_state_dict(torch.load(WEIGHT_FILE))
     print(F"Using weights file: {WEIGHT_FILE}")
+else:
+    print(F"No weights file found, generating new one during training.")
 
 # set up loss function and optimizer
 loss_function = nn.MSELoss()
@@ -161,14 +163,14 @@ start_time = time.time()
 
 # set to true for inference
 for _ in range(frames_to_render):
-    input = images[1].unsqueeze(0).unsqueeze(0).to(device)
+    input = images[2].unsqueeze(0).unsqueeze(0).to(device)
     output = FasteNet.forward(input)
     
     torch.cuda.synchronize()
 
     # set to true to display images
     if 1:
-        comparison = truths[1].unsqueeze(0).unsqueeze(0)
+        comparison = truths[2].unsqueeze(0).unsqueeze(0)
         figure = plt.figure()
         figure.add_subplot(3, 1, 1)
         plt.title('Input Image')
