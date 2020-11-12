@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import time
 import os
+import sys
 import numpy as np
 
 import torch
@@ -10,6 +11,7 @@ import torchvision.transforms.functional as TF
 
 from PIL import Image
 import matplotlib.pyplot as plt
+import cv2
 
 from ImageLoader import ImageLoader
 from FasteNet_Net import FasteNet
@@ -158,29 +160,51 @@ for epoch in range(0):
 # set frames to render > 0 to perform inference
 torch.no_grad()
 FasteNet.eval()
-frames_to_render = 1
+frames_to_render = 3000
 start_time = time.time()
 
 # set to true for inference
 for _ in range(frames_to_render):
     input = images[2].unsqueeze(0).unsqueeze(0).to(device)
     output = FasteNet.forward(input)
-    
     torch.cuda.synchronize()
 
+    # find contours in the image
+    image = output * 255
+    image = image.squeeze()
+    image = image.cpu().detach().numpy()
+    image = image.astype(np.uint8)
+    contours, hiearchy = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    # filter contours below certain area
+    filtered_contours = []
+
+    for contour in contours:
+        if cv2.contourArea(contour) > 5:
+            filtered_contours.append(contour)
+
+    # draw contours
+    contour_image = np.zeros_like(image)
+    cv2.drawContours(contour_image, filtered_contours, -1, 255, 1)
+    
+
     # set to true to display images
-    if 1:
+    if 0:
         comparison = truths[2].unsqueeze(0).unsqueeze(0)
         figure = plt.figure()
-        figure.add_subplot(3, 1, 1)
+        figure.add_subplot(4, 1, 1)
         plt.title('Input Image')
         plt.imshow(input.squeeze().to('cpu').detach().numpy())
-        figure.add_subplot(3, 1, 2)
+        figure.add_subplot(4, 1, 2)
         plt.title('Ground Truth')
         plt.imshow(comparison.squeeze().to('cpu').detach().numpy())
-        figure.add_subplot(3, 1, 3)
+        figure.add_subplot(4, 1, 3)
         plt.title('Predictions')
         plt.imshow(output.squeeze().to('cpu').detach().numpy())
+        figure.add_subplot(4, 1, 4)
+        plt.title('Contours')
+        plt.imshow(contour_image)
+
 
         plt.show()
 
