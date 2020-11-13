@@ -47,7 +47,7 @@ class helpers:
             # at the moment, no way to evaluate the current state of training, so we just record the current running loss
             self.lowest_running_loss = (self.running_loss.item() if (iterations == 100) else self.lowest_running_loss)
             
-            print(f'Epoch {epoch}; Batch Number {iterations}; Running Loss {self.running_loss.item()}; Lowest Running Loss {self.lowest_running_loss}')
+            print(f'Epoch {epoch}; Batch Number {iterations}; Running Loss {self.running_loss}; Lowest Running Loss {self.lowest_running_loss}')
 
             # save the network if the current running loss is lower than the one we have
             if(self.running_loss.item() < self.lowest_running_loss) and iterations > 1:
@@ -56,13 +56,13 @@ class helpers:
                 self.mark_number += 1
 
                 # regenerate the weights_file path
-                weights_file = os.path.join(self.weights_location, f'weights/Version{self.version_number}/weights{self.mark_number}.pth')
+                self.weights_file = os.path.join(self.weights_location, f'weights/Version{self.version_number}/weights{self.mark_number}.pth')
 
                 # reset the running loss for the next n batches
                 self.running_loss = 0.
 
                 # print the weight file that we should save to
-                print(F"New lowest point, saving weights to: {weights_file}")
+                print(F"New lowest point, saving weights to: {self.weights_file}")
                 return self.weights_file
 
             # reset the running loss for the next n batches
@@ -129,6 +129,8 @@ class helpers:
             plt.show()
 
             user_input = input('Key in "Y" to end display, enter to continue...')
+
+        exit()
 
 
     # converts saliency map to pseudo segmentation

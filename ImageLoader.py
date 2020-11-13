@@ -4,10 +4,9 @@ import torch.nn.functional as F
 
 import numpy as np
 from numpy import random as nprand
-import random
 
 class ImageLoader(Dataset):
-    def __init__(self, raw_images, ground_truths, image_size, crops_per_image=100000, crop_quant=32, crop_size=20):
+    def __init__(self, raw_images, ground_truths, image_size, crops_per_image=1000, crop_quant=8, crop_size=32):
         self.crops_per_image = crops_per_image
         self.crop_size = crop_size
         self.crop_dim = crop_quant * crop_size
@@ -16,12 +15,16 @@ class ImageLoader(Dataset):
         self.ground_truths = ground_truths
         self.image_size_x, self.image_size_y = image_size
 
+        self.number_of_images = len(raw_images)
+
+        print(f'Dataloader initiated: crop size={self.crop_dim}, number of images={self.number_of_images}, crops per image={self.crops_per_image}')
+
     def __len__(self):
-        return self.crops_per_image
+        return 150000
 
     def __getitem__(self, idx):
         # get random image and gorund truth image
-        index = random.choice(np.arange(len(self.raw_images)))
+        index = int(idx / self.crops_per_image)
         image = self.raw_images[index]
         truth = self.ground_truths[index]
 

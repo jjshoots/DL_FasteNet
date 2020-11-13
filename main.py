@@ -7,7 +7,6 @@ import sys
 
 import cv2
 import numpy as np
-from PIL import Image
 import matplotlib.pyplot as plt
 
 import torch
@@ -24,12 +23,12 @@ from FasteNet_Net_HyperLite import FasteNet_HyperLite
 
 # params
 DIRECTORY = os.path.dirname(__file__)
-DIRECTORY2 = DIRECTORY # 'C:\WEIGHTS'
+DIRECTORY2 = 'C:\WEIGHTS'
 
 VERSION_NUMBER = 5
-MARK_NUMBER = 0
+MARK_NUMBER = 1
 
-BATCH_SIZE = 30
+BATCH_SIZE = 200
 
 # instantiate helper object
 helpers = helpers(mark_number=MARK_NUMBER, version_number=VERSION_NUMBER, weights_location=DIRECTORY2)
@@ -40,21 +39,25 @@ images = []
 truths = []
 
 # read in the images
-for i in range(3):
-    image_path = os.path.join(DIRECTORY, f'img/raw{i+1}.png')
-    truth_path = os.path.join(DIRECTORY, f'img/ground{i+1}.png')
+for i in range(151):
+    image_path = os.path.join(DIRECTORY, f'Dataset/image/image_{i}.png')
+    truth_path = os.path.join(DIRECTORY, f'Dataset/label/label_{i}.png')
 
-    # read images, normalize truth to 1
-    image = TF.to_tensor(Image.open(image_path))[0, :, :]
-    truth = TF.to_tensor(Image.open(truth_path))[0, :, :]
-    truth /= torch.max(truth)
+    # read images
+    image = TF.to_tensor(cv2.imread(image_path))[0]
+    truth = TF.to_tensor(cv2.imread(truth_path))[0]
     
+    # normalize inputs, 1e-6 for stability as some images don't have truth masks (no fasteners)
+    image /= torch.max(image + 1e-6)
+    truth /= torch.max(truth + 1e-6)
+
     images.append(image)
     truths.append(truth)
 
+
 # feed data to the ImageLoader and start the dataloader to generate batches
-dataset = ImageLoader(images, truths, (images[0].shape[0], images[0].shape[1]), crop_size=51)
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=False, drop_last=True)
+dataset = ImageLoader(images, truths, (images[0].shape[0], images[0].shape[1]))
+dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
 
 # uncomment this to one to view the output of the dataset
 # helpers.peek_dataset(dataloader=dataloader)
@@ -72,7 +75,7 @@ loss_function = nn.MSELoss()
 optimizer = optim.SGD(FasteNet.parameters(), lr=0.001, momentum=0.9)
 
 #  start training
-for epoch in range(0):
+for epoch in range(1000):
 
     helpers.reset_running_loss()
 
