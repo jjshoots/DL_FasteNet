@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as func
 
+# weights file is version 4
+
 class FasteNet_HyperLite(nn.Module):
     def __init__(self):
         super().__init__()

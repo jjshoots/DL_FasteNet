@@ -7,7 +7,7 @@ from numpy import random as nprand
 import random
 
 class ImageLoader(Dataset):
-    def __init__(self, raw_images, ground_truths, image_size, crops_per_image=100000, crop_quant=8, crop_size=20):
+    def __init__(self, raw_images, ground_truths, image_size, crops_per_image=100000, crop_quant=32, crop_size=20):
         self.crops_per_image = crops_per_image
         self.crop_size = crop_size
         self.crop_dim = crop_quant * crop_size

@@ -16,8 +16,8 @@ import torch.optim as optim
 import torchvision.transforms.functional as TF
 
 from helpers import helpers
-
 from ImageLoader import ImageLoader
+from FasteNet_Net_v2 import FasteNet_v2
 from FasteNet_Net import FasteNet
 from FasteNet_Net_Lite import FasteNet_Lite
 from FasteNet_Net_HyperLite import FasteNet_HyperLite
@@ -26,12 +26,10 @@ from FasteNet_Net_HyperLite import FasteNet_HyperLite
 DIRECTORY = os.path.dirname(__file__)
 DIRECTORY2 = DIRECTORY # 'C:\WEIGHTS'
 
-VERSION_NUMBER = 2
-MARK_NUMBER = 50
+VERSION_NUMBER = 5
+MARK_NUMBER = 0
 
 BATCH_SIZE = 30
-
-THRESHOLD = 0.8
 
 # instantiate helper object
 helpers = helpers(mark_number=MARK_NUMBER, version_number=VERSION_NUMBER, weights_location=DIRECTORY2)
@@ -62,7 +60,7 @@ dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE, shuffle
 # helpers.peek_dataset(dataloader=dataloader)
 
 # set up net
-FasteNet = FasteNet().to(device)
+FasteNet = FasteNet_v2().to(device)
 
 # get latest weight file
 weights_file = helpers.get_latest_weight_file()
@@ -122,7 +120,7 @@ start_time = time.time()
 
 # set to true for inference
 for _ in range(frames_to_render):
-    input = images[2].unsqueeze(0).unsqueeze(0).to(device)
+    input = images[2].unsqueeze(0).unsqueeze(0).to(device)[..., :1600]
     saliency_map = FasteNet.forward(input)
     torch.cuda.synchronize()
 
@@ -145,7 +143,7 @@ for _ in range(frames_to_render):
         # figure.add_subplot(4, 1, 4)
         # plt.title('Predictions')
         plt.imshow(contour_image)
-        print(f'Number of Fasteners in Image: {contour_number}')
+        plt.title(f'Number of Fasteners in Image: {contour_number}')
 
 
         plt.show()
