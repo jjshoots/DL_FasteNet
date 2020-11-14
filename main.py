@@ -7,6 +7,7 @@ import sys
 
 import cv2
 import numpy as np
+from numpy import random as nprand
 import matplotlib.pyplot as plt
 
 import torch
@@ -23,12 +24,13 @@ from FasteNet_Net_HyperLite import FasteNet_HyperLite
 
 # params
 DIRECTORY = os.path.dirname(__file__)
-DIRECTORY2 = 'C:\WEIGHTS'
+DIRECTORY2 = DIRECTORY # 'C:\WEIGHTS'
 
 VERSION_NUMBER = 5
-MARK_NUMBER = 1
+MARK_NUMBER = 257
 
 BATCH_SIZE = 200
+NUMBER_OF_IMAGES = 151
 
 # instantiate helper object
 helpers = helpers(mark_number=MARK_NUMBER, version_number=VERSION_NUMBER, weights_location=DIRECTORY2)
@@ -39,7 +41,7 @@ images = []
 truths = []
 
 # read in the images
-for i in range(151):
+for i in range(NUMBER_OF_IMAGES):
     image_path = os.path.join(DIRECTORY, f'Dataset/image/image_{i}.png')
     truth_path = os.path.join(DIRECTORY, f'Dataset/label/label_{i}.png')
 
@@ -75,7 +77,7 @@ loss_function = nn.MSELoss()
 optimizer = optim.SGD(FasteNet.parameters(), lr=0.001, momentum=0.9)
 
 #  start training
-for epoch in range(1000):
+for epoch in range(0):
 
     helpers.reset_running_loss()
 
@@ -118,12 +120,12 @@ for epoch in range(1000):
 # set frames to render > 0 to perform inference
 torch.no_grad()
 FasteNet.eval()
-frames_to_render = 3000
+frames_to_render = 10
 start_time = time.time()
 
 # set to true for inference
 for _ in range(frames_to_render):
-    input = images[2].unsqueeze(0).unsqueeze(0).to(device)[..., :1600]
+    input = images[nprand.randint(0, NUMBER_OF_IMAGES)].unsqueeze(0).unsqueeze(0).to(device)[..., :1600]
     saliency_map = FasteNet.forward(input)
     torch.cuda.synchronize()
 
@@ -131,7 +133,7 @@ for _ in range(frames_to_render):
     contour_image, contour_number = helpers.saliency_to_contour(input=saliency_map, original_image=input, fastener_area_threshold=5, input_output_ratio=8)
 
     # set to true to display images
-    if 0:
+    if 1:
         # comparison = truths[2].unsqueeze(0).unsqueeze(0)
         # figure = plt.figure()
         # figure.add_subplot(4, 1, 1)
