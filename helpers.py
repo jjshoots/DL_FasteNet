@@ -30,6 +30,12 @@ class helpers:
         # home directory
         self.directory = os.path.dirname(__file__)
 
+        # record that we're in a new training session
+        f = open(os.path.join(self.weights_location, f'weights/Version{self.version_number}/training_log.txt'), "a")
+        f.write(f'New Training Session, Net Version {self.version_number} \n')
+        f.write(f'Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number \n')
+        f.close()
+
 
 
     # simple call to reset internal running loss
@@ -43,11 +49,18 @@ class helpers:
     def training_checkpoint(self, loss, iterations, epoch):
         self.running_loss += loss
 
-        if iterations % 100 == 0:
+        if iterations % 100 == 0 and iterations != 0:
             # at the moment, no way to evaluate the current state of training, so we just record the current running loss
             self.lowest_running_loss = (self.running_loss.item() if (iterations == 100) else self.lowest_running_loss)
             
+            # print status
             print(f'Epoch {epoch}; Batch Number {iterations}; Running Loss {self.running_loss}; Lowest Running Loss {self.lowest_running_loss}')
+            
+            # record training log
+            f = open(os.path.join(self.weights_location, f'weights/Version{self.version_number}/training_log.txt'), "a")
+            f.write(f'{epoch}, {iterations}, {self.running_loss}, {self.lowest_running_loss}, {self.mark_number} \n')
+            f.close()
+
 
             # save the network if the current running loss is lower than the one we have
             if(self.running_loss.item() < self.lowest_running_loss) and iterations > 1:

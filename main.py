@@ -77,7 +77,7 @@ loss_function = nn.MSELoss()
 optimizer = optim.SGD(FasteNet.parameters(), lr=0.001, momentum=0.9)
 
 #  start training
-for epoch in range(0):
+for epoch in range(1000):
 
     helpers.reset_running_loss()
 
