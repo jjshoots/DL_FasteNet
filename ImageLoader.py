@@ -20,7 +20,7 @@ class ImageLoader(Dataset):
         print(f'Dataloader initiated: crop size={self.crop_dim}, number of images={self.number_of_images}, crops per image={self.crops_per_image}')
 
     def __len__(self):
-        return 150000
+        return self.number_of_images * self.crops_per_image
 
     def __getitem__(self, idx):
         # get random image and gorund truth image
