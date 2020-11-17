@@ -51,7 +51,7 @@ class helpers:
 
         if iterations % 100 == 0 and iterations != 0:
             # at the moment, no way to evaluate the current state of training, so we just record the current running loss
-            self.lowest_running_loss = (self.running_loss.item() if (iterations == 100 and epoch == 1) else self.lowest_running_loss)
+            self.lowest_running_loss = (self.running_loss.item() if (iterations == 100 and epoch == 0) else self.lowest_running_loss)
             
             # print status
             print(f'Epoch {epoch}; Batch Number {iterations}; Running Loss {self.running_loss}; Lowest Running Loss {self.lowest_running_loss}')
@@ -159,6 +159,7 @@ class helpers:
         filtered_contours = []
 
         for contour in contours:
+            print(cv2.contourArea(contour))
             if cv2.contourArea(contour) > fastener_area_threshold:
                 contour *= input_output_ratio
                 filtered_contours.append(contour)

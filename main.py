@@ -27,7 +27,7 @@ DIRECTORY = 'C:\AI\DATA' # os.path.dirname(__file__)
 DIRECTORY2 = 'C:\AI\WEIGHTS'
 
 VERSION_NUMBER = 5
-MARK_NUMBER = 400
+MARK_NUMBER = 413
 
 BATCH_SIZE = 200
 NUMBER_OF_IMAGES = 700
@@ -85,9 +85,7 @@ loss_function = nn.MSELoss()
 optimizer = optim.SGD(FasteNet.parameters(), lr=0.001, momentum=0.9)
 
 #  start training
-for epoch in range(10000):
-    if epoch % NUMBER_OF_CYCLES == 0:
-        continue
+for epoch in range(0):
 
     dataloader = generate_dataloader(epoch % NUMBER_OF_CYCLES)
 
@@ -132,35 +130,52 @@ for epoch in range(10000):
 # set frames to render > 0 to perform inference
 torch.no_grad()
 FasteNet.eval()
-frames_to_render = 0
+frames_to_render = 10
+image_range = 700
 start_time = time.time()
+
 
 # set to true for inference
 for _ in range(frames_to_render):
-    input = images[nprand.randint(0, NUMBER_OF_IMAGES)].unsqueeze(0).unsqueeze(0).to(device)[..., :1600]
+    index = nprand.randint(0, image_range)
+
+    image_path = os.path.join(DIRECTORY, f'Dataset/image/image_{index}.png')
+    truth_path = os.path.join(DIRECTORY, f'Dataset/label/label_{index}.png')
+
+    # read images
+    image = TF.to_tensor(cv2.imread(image_path))[0]
+    truth = TF.to_tensor(cv2.imread(truth_path))[0]
+    
+    # normalize inputs, 1e-6 for stability as some images don't have truth masks (no fasteners)
+    image /= torch.max(image + 1e-6)
+    truth /= torch.max(truth + 1e-6)
+
+    input = image.unsqueeze(0).unsqueeze(0).to(device)[..., :1600]
     saliency_map = FasteNet.forward(input)
     torch.cuda.synchronize()
 
-    # draw contours on original image
-    contour_image, contour_number = helpers.saliency_to_contour(input=saliency_map, original_image=input, fastener_area_threshold=5, input_output_ratio=8)
+    # draw contours on original image and prediction image
+    contour_image, contour_number = helpers.saliency_to_contour(input=saliency_map, original_image=input, fastener_area_threshold=1, input_output_ratio=8)
+    ground_image, ground_number = helpers.saliency_to_contour(input=truth.unsqueeze(0).unsqueeze(0)[..., :1600] * 255, original_image=input, fastener_area_threshold=1, input_output_ratio=1)
 
     # set to true to display images
     if 1:
-        comparison = truths[2].unsqueeze(0).unsqueeze(0)
         figure = plt.figure()
-        figure.add_subplot(4, 1, 1)
-        plt.title('Input Image')
+
+        figure.add_subplot(2, 2, 1)
+        plt.title(f'Input Image: Index {index}')
         plt.imshow(input.squeeze().to('cpu').detach().numpy())
-        figure.add_subplot(4, 1, 2)
+        figure.add_subplot(2, 2, 2)
         plt.title('Ground Truth')
-        plt.imshow(comparison.squeeze().to('cpu').detach().numpy())
-        figure.add_subplot(4, 1, 3)
+        plt.imshow(ground_image)
+        plt.title(f'Ground Truth Number of Fasteners in Image: {ground_number}')
+        figure.add_subplot(2, 2, 3)
         plt.title('Saliency Map')
         plt.imshow(saliency_map.squeeze().to('cpu').detach().numpy())
-        figure.add_subplot(4, 1, 4)
+        figure.add_subplot(2, 2, 4)
         plt.title('Predictions')
         plt.imshow(contour_image)
-        plt.title(f'Number of Fasteners in Image: {contour_number}')
+        plt.title(f'Predicted Number of Fasteners in Image: {contour_number}')
 
 
         plt.show()
