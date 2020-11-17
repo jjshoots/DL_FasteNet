@@ -23,43 +23,51 @@ from FasteNet_Net_Lite import FasteNet_Lite
 from FasteNet_Net_HyperLite import FasteNet_HyperLite
 
 # params
-DIRECTORY = os.path.dirname(__file__)
-DIRECTORY2 = DIRECTORY # 'C:\WEIGHTS'
+DIRECTORY = 'C:\AI\DATA' # os.path.dirname(__file__)
+DIRECTORY2 = 'C:\AI\WEIGHTS'
 
 VERSION_NUMBER = 5
-MARK_NUMBER = 257
+MARK_NUMBER = 400
 
 BATCH_SIZE = 200
-NUMBER_OF_IMAGES = 151
+NUMBER_OF_IMAGES = 700
+NUMBER_OF_CYCLES = 5
 
 # instantiate helper object
 helpers = helpers(mark_number=MARK_NUMBER, version_number=VERSION_NUMBER, weights_location=DIRECTORY2)
 device = helpers.get_device()
 
-# holder for images and groundtruths and lowest running loss
-images = []
-truths = []
+def generate_dataloader(index):
+    # holder for images and groundtruths and lowest running loss
+    images = []
+    truths = []
 
-# read in the images
-for i in range(NUMBER_OF_IMAGES):
-    image_path = os.path.join(DIRECTORY, f'Dataset/image/image_{i}.png')
-    truth_path = os.path.join(DIRECTORY, f'Dataset/label/label_{i}.png')
+    from_image = int(index * NUMBER_OF_IMAGES/NUMBER_OF_CYCLES)
+    to_image = int((index+1) * NUMBER_OF_IMAGES/NUMBER_OF_CYCLES)
 
-    # read images
-    image = TF.to_tensor(cv2.imread(image_path))[0]
-    truth = TF.to_tensor(cv2.imread(truth_path))[0]
-    
-    # normalize inputs, 1e-6 for stability as some images don't have truth masks (no fasteners)
-    image /= torch.max(image + 1e-6)
-    truth /= torch.max(truth + 1e-6)
+    # read in the images
+    for i in range(from_image, to_image):
+        image_path = os.path.join(DIRECTORY, f'Dataset/image/image_{i}.png')
+        truth_path = os.path.join(DIRECTORY, f'Dataset/label/label_{i}.png')
 
-    images.append(image)
-    truths.append(truth)
+        # read images
+        image = TF.to_tensor(cv2.imread(image_path))[0]
+        truth = TF.to_tensor(cv2.imread(truth_path))[0]
+        
+        # normalize inputs, 1e-6 for stability as some images don't have truth masks (no fasteners)
+        image /= torch.max(image + 1e-6)
+        truth /= torch.max(truth + 1e-6)
+
+        images.append(image)
+        truths.append(truth)
+
+    print(f'Loaded images {from_image} to {to_image}')
 
 
-# feed data to the ImageLoader and start the dataloader to generate batches
-dataset = ImageLoader(images, truths, (images[0].shape[0], images[0].shape[1]))
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
+    # feed data to the ImageLoader and start the dataloader to generate batches
+    dataset = ImageLoader(images, truths, (images[0].shape[0], images[0].shape[1]))
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
+    return dataloader
 
 # uncomment this to one to view the output of the dataset
 # helpers.peek_dataset(dataloader=dataloader)
@@ -77,7 +85,11 @@ loss_function = nn.MSELoss()
 optimizer = optim.SGD(FasteNet.parameters(), lr=0.001, momentum=0.9)
 
 #  start training
-for epoch in range(1000):
+for epoch in range(10000):
+    if epoch % NUMBER_OF_CYCLES == 0:
+        continue
+
+    dataloader = generate_dataloader(epoch % NUMBER_OF_CYCLES)
 
     helpers.reset_running_loss()
 
@@ -120,7 +132,7 @@ for epoch in range(1000):
 # set frames to render > 0 to perform inference
 torch.no_grad()
 FasteNet.eval()
-frames_to_render = 10
+frames_to_render = 0
 start_time = time.time()
 
 # set to true for inference
@@ -134,19 +146,19 @@ for _ in range(frames_to_render):
 
     # set to true to display images
     if 1:
-        # comparison = truths[2].unsqueeze(0).unsqueeze(0)
-        # figure = plt.figure()
-        # figure.add_subplot(4, 1, 1)
-        # plt.title('Input Image')
-        # plt.imshow(input.squeeze().to('cpu').detach().numpy())
-        # figure.add_subplot(4, 1, 2)
-        # plt.title('Ground Truth')
-        # plt.imshow(comparison.squeeze().to('cpu').detach().numpy())
-        # figure.add_subplot(4, 1, 3)
-        # plt.title('Saliency Map')
-        # plt.imshow(saliency_map.squeeze().to('cpu').detach().numpy())
-        # figure.add_subplot(4, 1, 4)
-        # plt.title('Predictions')
+        comparison = truths[2].unsqueeze(0).unsqueeze(0)
+        figure = plt.figure()
+        figure.add_subplot(4, 1, 1)
+        plt.title('Input Image')
+        plt.imshow(input.squeeze().to('cpu').detach().numpy())
+        figure.add_subplot(4, 1, 2)
+        plt.title('Ground Truth')
+        plt.imshow(comparison.squeeze().to('cpu').detach().numpy())
+        figure.add_subplot(4, 1, 3)
+        plt.title('Saliency Map')
+        plt.imshow(saliency_map.squeeze().to('cpu').detach().numpy())
+        figure.add_subplot(4, 1, 4)
+        plt.title('Predictions')
         plt.imshow(contour_image)
         plt.title(f'Number of Fasteners in Image: {contour_number}')
 
