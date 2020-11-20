@@ -5,6 +5,8 @@ import os
 import sys
 import numpy as np
 
+from pthflops import count_ops
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -155,19 +157,25 @@ class helpers:
         threshold = input.detach().cpu().squeeze().numpy().astype(np.uint8)
         contours, _ = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        # filter contours below certain area
-        filtered_contours = []
+        # draw contours
+        contour_image = None
+        contour_number = 0
+        if original_image != None:
+            contour_image = original_image.squeeze().to('cpu').detach().numpy()
 
         for contour in contours:
-            print(cv2.contourArea(contour))
             if cv2.contourArea(contour) > fastener_area_threshold:
                 contour *= input_output_ratio
-                filtered_contours.append(contour)
-
-        # draw contours
-        contour_image = original_image.squeeze().to('cpu').detach().numpy()
-        cv2.drawContours(contour_image, filtered_contours, -1, 1, 1)
+                contour_number += 1
+                if original_image != None:
+                    x,y,w,h = cv2.boundingRect(contour)
+                    cv2.rectangle(contour_image,(x,y),(x+w,y+h),1,2)
 
         # return drawn image
-        return contour_image, len(filtered_contours)
+        return contour_image, contour_number
 
+    @staticmethod
+    def network_stats(network, input_image):
+        total_params = sum(p.numel() for p in network.parameters() if p.requires_grad)
+        count_ops(network, input_image)
+        print(f'Total number of Parameters: {total_params}')
