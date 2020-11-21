@@ -51,7 +51,8 @@ class FasteNet(nn.Module):
         x = self.net(input)
         
         if not self.training:
-            x = self.threshold_layer(x)
-            x = torch.ceil(x)
+            pass
+            # x = self.threshold_layer(x)
+            # x = torch.ceil(x)
         
         return x

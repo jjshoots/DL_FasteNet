@@ -308,3 +308,11 @@ New Training Session, Net Version 7
 Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
 New Training Session, Net Version 7 
 Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 7 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 7 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 7 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 7 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 

@@ -1179,3 +1179,104 @@ Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number
 9, 400, 0.7493197917938232, 0.6633323431015015, 505 
 9, 500, 0.7450228333473206, 0.6633323431015015, 505 
 9, 600, 0.7414516806602478, 0.6633323431015015, 505 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+New Training Session, Net Version 5 
+Epoch, iterations, Running Loss, Lowest Running Loss, Mark Number 
+0, 100, 1.169507384300232, 1.169507384300232, 505 

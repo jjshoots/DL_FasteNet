@@ -75,7 +75,7 @@ def generate_dataloader(index):
 # helpers.peek_dataset(dataloader=dataloader)
 
 # set up net
-FasteNet = FasteNet_Large().to(device)
+FasteNet = FasteNet_Vanilla().to(device)
 
 # get latest weight file
 weights_file = helpers.get_latest_weight_file()
@@ -90,7 +90,7 @@ optimizer = optim.Adam(FasteNet.parameters(), )
 
 # get network param number and gflops
 # image_path = os.path.join(DIRECTORY, f'Dataset/image/image_{1}.png')
-# image = TF.to_tensor(cv2.imread(image_path))[0].unsqueeze(0).unsqueeze(0)[..., :1608].to(device)
+# image = TF.to_tensor(cv2.imread(image_path))[0].unsqueeze(0).unsqueeze(0)[..., :1600].to(device)
 # image /= torch.max(image + 1e-6)
 # helpers.network_stats(FasteNet, image)
 
@@ -109,7 +109,7 @@ for epoch in range(0):
         # get the output and calculate the loss
         output = FasteNet.forward(data)
 
-        if True:
+        if False:
             plt.imshow(data[0].squeeze().to('cpu').detach().numpy())
             plt.show()
             plt.imshow(labels[0].squeeze().to('cpu').detach().numpy())
@@ -147,7 +147,7 @@ total_false_positive = 1e-6
 total_false_negative = 1e-6
 
 # set to true for inference
-for index in range(700,997):
+for index in range(700, 997):
     image_path = os.path.join(DIRECTORY, f'Dataset/image/image_{index}.png')
     truth_path = os.path.join(DIRECTORY, f'Dataset/label/label_{index}.png')
 
@@ -160,16 +160,16 @@ for index in range(700,997):
     truth /= torch.max(truth + 1e-6)
 
 
-    input = image.unsqueeze(0).unsqueeze(0).to(device)[..., :1608]
+    input = image.unsqueeze(0).unsqueeze(0).to(device)[..., :1600]
     saliency_map = FasteNet.forward(input)
     torch.cuda.synchronize()
 
     # calculate true positive number
-    _, true_positive_number = helpers.saliency_to_contour(input=saliency_map.to('cpu') * F.interpolate(truth.unsqueeze(0).unsqueeze(0)[..., :1608] * 255, size=[saliency_map.shape[-2], saliency_map.shape[-1]]), original_image=None, fastener_area_threshold=1, input_output_ratio=8)
+    _, true_positive_number = helpers.saliency_to_contour(input=saliency_map.to('cpu') * F.interpolate(truth.unsqueeze(0).unsqueeze(0)[..., :1600] * 255, size=[saliency_map.shape[-2], saliency_map.shape[-1]]), original_image=None, fastener_area_threshold=1, input_output_ratio=8)
 
     # draw contours on original image and prediction image
     _, contour_number = helpers.saliency_to_contour(input=saliency_map, original_image=None, fastener_area_threshold=1, input_output_ratio=8)
-    _, ground_number = helpers.saliency_to_contour(input=truth.unsqueeze(0).unsqueeze(0)[..., :1608] * 255, original_image=None, fastener_area_threshold=1, input_output_ratio=1)
+    _, ground_number = helpers.saliency_to_contour(input=truth.unsqueeze(0).unsqueeze(0)[..., :1600] * 255, original_image=None, fastener_area_threshold=1, input_output_ratio=1)
 
     false_positive_number = contour_number - true_positive_number
     false_negative_number = ground_number - true_positive_number
@@ -201,7 +201,8 @@ print(f'Total images mined: {negative_mined_number}')
 print(f'Precision: {total_true_positive / (total_true_positive + total_false_positive)}')
 print(f'Recall: {total_true_positive / (total_true_positive + total_false_negative)}')
 
-# exit()
+exit()
+
 # FOR INFERENCING
 # FOR INFERENCING
 # FOR INFERENCING
@@ -209,7 +210,7 @@ print(f'Recall: {total_true_positive / (total_true_positive + total_false_negati
 # set frames to render > 0 to perform inference
 torch.no_grad()
 FasteNet.eval()
-frames_to_render = 0
+frames_to_render = 100
 start_time = time.time()
 
 
@@ -228,13 +229,18 @@ for _ in range(frames_to_render):
     image /= torch.max(image + 1e-6)
     truth /= torch.max(truth + 1e-6)
 
-    input = image.unsqueeze(0).unsqueeze(0).to(device)[..., :1608]
+    input = image.unsqueeze(0).unsqueeze(0).to(device)[..., :1600]
     saliency_map = FasteNet.forward(input)
     torch.cuda.synchronize()
 
     # draw contours on original image and prediction image
     contour_image, contour_number = helpers.saliency_to_contour(input=saliency_map, original_image=input, fastener_area_threshold=0, input_output_ratio=8)
-    ground_image, ground_number = helpers.saliency_to_contour(input=truth.unsqueeze(0).unsqueeze(0)[..., :1608] * 255, original_image=input, fastener_area_threshold=1, input_output_ratio=1)
+    ground_image, ground_number = helpers.saliency_to_contour(input=truth.unsqueeze(0).unsqueeze(0)[..., :1600] * 255, original_image=input, fastener_area_threshold=1, input_output_ratio=1)
+
+    # use this however you want to use it
+    image_image = np.array(cv2.imread(image_path)[..., 0][:, :1600], dtype=np.float64)
+    image_image /= 205
+    fused_image = np.transpose(np.array([ground_image, contour_image, image_image]), [1, 2, 0])
 
     # set to true to display images
     if True:
@@ -252,7 +258,7 @@ for _ in range(frames_to_render):
         plt.imshow(saliency_map.squeeze().to('cpu').detach().numpy(), cmap='gray')
         figure.add_subplot(2, 2, 4)
         plt.title('Predictions')
-        plt.imshow(contour_image, cmap='gray')
+        plt.imshow(fused_image)
         plt.title(f'Predicted Number of Fasteners in Image: {contour_number}')
 
         plt.show()

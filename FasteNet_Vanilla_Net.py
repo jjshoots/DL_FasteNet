@@ -59,7 +59,7 @@ class FasteNet_Vanilla(nn.Module):
             nn.Sigmoid()
         )
 
-        self.threshold_layer = nn.Threshold(0.8, value=0)
+        self.threshold_layer = nn.Threshold(0.9, value=0)
 
     def forward(self, input):
         x = self.net(input)
