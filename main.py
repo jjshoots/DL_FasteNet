@@ -75,7 +75,7 @@ def generate_dataloader(index):
 # helpers.peek_dataset(dataloader=dataloader)
 
 # set up net
-FasteNet = FasteNet_Vanilla().to(device)
+FasteNet = FasteNet_v2().to(device)
 
 # get latest weight file
 weights_file = helpers.get_latest_weight_file()
