@@ -84,9 +84,7 @@ if weights_file != -1:
 
 # set up loss function and optimizer and load in data
 loss_function = nn.MSELoss()
-optimizer = optim.SGD(FasteNet.parameters(), lr=1e-6, weight_decay=1e-2)
-optimizer = optim.Adam(FasteNet.parameters(), )
-# dataloader = generate_dataloader(0)
+optimizer = optim.Adam(FasteNet.parameters(), lr=1e-6, weight_decay=1e-2)
 
 # get network param number and gflops
 # image_path = os.path.join(DIRECTORY, f'Dataset/image/image_{1}.png')
@@ -239,7 +237,7 @@ for _ in range(frames_to_render):
 
     # use this however you want to use it
     image_image = np.array(cv2.imread(image_path)[..., 0][:, :1600], dtype=np.float64)
-    image_image /= 205
+    image_image /= 205 # approximate multiplier, I don't actually know the scale anymore at this point
     fused_image = np.transpose(np.array([ground_image, contour_image, image_image]), [1, 2, 0])
 
     # set to true to display images
