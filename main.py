@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-from pickle import MARK
-from sys import version
 import time
 import os
 import sys
@@ -13,53 +11,65 @@ import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torch.nn.functional as F
 import torchvision.transforms.functional as TF
 
 from helpers import helpers
 from ImageLoader import ImageLoader
 from FasteNet_Net_v2 import FasteNet_v2
-from FasteNet_Net import FasteNet
-from FasteNet_Net_Lite import FasteNet_Lite
-from FasteNet_Net_HyperLite import FasteNet_HyperLite
+
+from FasteNet_Vanilla_Net import FasteNet_Vanilla
+from FasteNet_Large_Net import FasteNet_Large
 
 # params
-DIRECTORY = os.path.dirname(__file__)
-DIRECTORY2 = DIRECTORY # 'C:\WEIGHTS'
+DIRECTORY = 'C:\AI\DATA' # os.path.dirname(__file__)
+DIRECTORY2 = 'C:\AI\WEIGHTS'
+SHUTDOWN_AFTER_TRAINING = False
 
 VERSION_NUMBER = 5
-MARK_NUMBER = 257
+MARK_NUMBER = 505
 
-BATCH_SIZE = 200
-NUMBER_OF_IMAGES = 151
+BATCH_SIZE = 100
+NUMBER_OF_IMAGES = 700
+NUMBER_OF_CYCLES = 5
 
 # instantiate helper object
 helpers = helpers(mark_number=MARK_NUMBER, version_number=VERSION_NUMBER, weights_location=DIRECTORY2)
 device = helpers.get_device()
 
-# holder for images and groundtruths and lowest running loss
-images = []
-truths = []
+def generate_dataloader(index):
+    # holder for images and groundtruths and lowest running loss
+    images = []
+    truths = []
 
-# read in the images
-for i in range(NUMBER_OF_IMAGES):
-    image_path = os.path.join(DIRECTORY, f'Dataset/image/image_{i}.png')
-    truth_path = os.path.join(DIRECTORY, f'Dataset/label/label_{i}.png')
+    from_image = int(index * NUMBER_OF_IMAGES/NUMBER_OF_CYCLES)
+    to_image = int((index+1) * NUMBER_OF_IMAGES/NUMBER_OF_CYCLES)
 
-    # read images
-    image = TF.to_tensor(cv2.imread(image_path))[0]
-    truth = TF.to_tensor(cv2.imread(truth_path))[0]
-    
-    # normalize inputs, 1e-6 for stability as some images don't have truth masks (no fasteners)
-    image /= torch.max(image + 1e-6)
-    truth /= torch.max(truth + 1e-6)
+    # read in the images
+    for i in range(from_image, to_image):
+        image_path = os.path.join(DIRECTORY, f'Dataset/image/image_{i}.png')
+        truth_path = os.path.join(DIRECTORY, f'Dataset/label/label_{i}.png')
 
-    images.append(image)
-    truths.append(truth)
+        if os.path.isfile(image_path): 
+
+            # read images
+            image = TF.to_tensor(cv2.imread(image_path))[0]
+            truth = TF.to_tensor(cv2.imread(truth_path))[0]
+            
+            # normalize inputs, 1e-6 for stability as some images don't have truth masks (no fasteners)
+            image /= torch.max(image + 1e-6)
+            truth /= torch.max(truth + 1e-6)
+
+            images.append(image)
+            truths.append(truth)
+
+    print(f'Attempted to load images {from_image} to {to_image}, actually loaded {len(images)} images.')
 
 
-# feed data to the ImageLoader and start the dataloader to generate batches
-dataset = ImageLoader(images, truths, (images[0].shape[0], images[0].shape[1]))
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
+    # feed data to the ImageLoader and start the dataloader to generate batches
+    dataset = ImageLoader(images, truths, (images[0].shape[0], images[0].shape[1]))
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
+    return dataloader
 
 # uncomment this to one to view the output of the dataset
 # helpers.peek_dataset(dataloader=dataloader)
@@ -72,13 +82,19 @@ weights_file = helpers.get_latest_weight_file()
 if weights_file != -1:
     FasteNet.load_state_dict(torch.load(weights_file))
 
-# set up loss function and optimizer
+# set up loss function and optimizer and load in data
 loss_function = nn.MSELoss()
-optimizer = optim.SGD(FasteNet.parameters(), lr=0.001, momentum=0.9)
+optimizer = optim.Adam(FasteNet.parameters(), lr=1e-6, weight_decay=1e-2)
+
+# get network param number and gflops
+# image_path = os.path.join(DIRECTORY, f'Dataset/image/image_{1}.png')
+# image = TF.to_tensor(cv2.imread(image_path))[0].unsqueeze(0).unsqueeze(0)[..., :1600].to(device)
+# image /= torch.max(image + 1e-6)
+# helpers.network_stats(FasteNet, image)
 
 #  start training
-for epoch in range(1000):
-
+for epoch in range(0):
+    dataloader = generate_dataloader(epoch % NUMBER_OF_CYCLES)
     helpers.reset_running_loss()
 
     for i, data in enumerate(dataloader):
@@ -91,7 +107,7 @@ for epoch in range(1000):
         # get the output and calculate the loss
         output = FasteNet.forward(data)
 
-        if 0:
+        if False:
             plt.imshow(data[0].squeeze().to('cpu').detach().numpy())
             plt.show()
             plt.imshow(labels[0].squeeze().to('cpu').detach().numpy())
@@ -108,10 +124,82 @@ for epoch in range(1000):
 
         if weights_file != -1:
             torch.save(FasteNet.state_dict(), weights_file)
-        
+
+if SHUTDOWN_AFTER_TRAINING:
+    os.system("shutdown /s /t 30")
+    exit()
+
+# exit()
+
+# HARD NEGATIVE MINING
+# HARD NEGATIVE MINING
+# HARD NEGATIVE MINING
+
+# params
+torch.no_grad()
+FasteNet.eval()
+negative_mined_number = 0
+
+total_true_positive = 1e-6
+total_false_positive = 1e-6
+total_false_negative = 1e-6
+
+# set to true for inference
+for index in range(700, 997):
+    image_path = os.path.join(DIRECTORY, f'Dataset/image/image_{index}.png')
+    truth_path = os.path.join(DIRECTORY, f'Dataset/label/label_{index}.png')
+
+    # read images
+    image = TF.to_tensor(cv2.imread(image_path))[0]
+    truth = TF.to_tensor(cv2.imread(truth_path))[0]
+    
+    # normalize inputs, 1e-6 for stability as some images don't have truth masks (no fasteners)
+    image /= torch.max(image + 1e-6)
+    truth /= torch.max(truth + 1e-6)
 
 
+    input = image.unsqueeze(0).unsqueeze(0).to(device)[..., :1600]
+    saliency_map = FasteNet.forward(input)
+    torch.cuda.synchronize()
 
+    # calculate true positive number
+    _, true_positive_number = helpers.saliency_to_contour(input=saliency_map.to('cpu') * F.interpolate(truth.unsqueeze(0).unsqueeze(0)[..., :1600] * 255, size=[saliency_map.shape[-2], saliency_map.shape[-1]]), original_image=None, fastener_area_threshold=1, input_output_ratio=8)
+
+    # draw contours on original image and prediction image
+    _, contour_number = helpers.saliency_to_contour(input=saliency_map, original_image=None, fastener_area_threshold=1, input_output_ratio=8)
+    _, ground_number = helpers.saliency_to_contour(input=truth.unsqueeze(0).unsqueeze(0)[..., :1600] * 255, original_image=None, fastener_area_threshold=1, input_output_ratio=1)
+
+    false_positive_number = contour_number - true_positive_number
+    false_negative_number = ground_number - true_positive_number
+
+    if(false_positive_number < 0):
+        print(f'Image {index} has more true positives than contour, likely because area threshold is not large enough.')
+
+    total_true_positive += true_positive_number
+    total_false_positive += false_positive_number
+    total_false_negative += false_negative_number
+
+    if abs(ground_number - contour_number) > 2:
+        continue
+        # read images
+        image = cv2.imread(image_path)
+        truth = cv2.imread(truth_path)
+
+        # hard negative image path
+        save_image_path = os.path.join(DIRECTORY, f'Dataset/hard_negative/image/image_{index}.png')
+        save_truth_path = os.path.join(DIRECTORY, f'Dataset/hard_negative/label/label_{index}.png')
+
+        # save the images
+        cv2.imwrite(save_image_path, image)
+        cv2.imwrite(save_truth_path, truth)
+
+        negative_mined_number += 1
+
+print(f'Total images mined: {negative_mined_number}')
+print(f'Precision: {total_true_positive / (total_true_positive + total_false_positive)}')
+print(f'Recall: {total_true_positive / (total_true_positive + total_false_negative)}')
+
+exit()
 
 # FOR INFERENCING
 # FOR INFERENCING
@@ -120,39 +208,60 @@ for epoch in range(1000):
 # set frames to render > 0 to perform inference
 torch.no_grad()
 FasteNet.eval()
-frames_to_render = 10
+frames_to_render = 100
 start_time = time.time()
+
 
 # set to true for inference
 for _ in range(frames_to_render):
-    input = images[nprand.randint(0, NUMBER_OF_IMAGES)].unsqueeze(0).unsqueeze(0).to(device)[..., :1600]
+    index = nprand.randint(0, 996)
+
+    image_path = os.path.join(DIRECTORY, f'Dataset/image/image_{index}.png')
+    truth_path = os.path.join(DIRECTORY, f'Dataset/label/label_{index}.png')
+
+    # read images
+    image = TF.to_tensor(cv2.imread(image_path))[0]
+    truth = TF.to_tensor(cv2.imread(truth_path))[0]
+    
+    # normalize inputs, 1e-6 for stability as some images don't have truth masks (no fasteners)
+    image /= torch.max(image + 1e-6)
+    truth /= torch.max(truth + 1e-6)
+
+    input = image.unsqueeze(0).unsqueeze(0).to(device)[..., :1600]
     saliency_map = FasteNet.forward(input)
     torch.cuda.synchronize()
 
-    # draw contours on original image
-    contour_image, contour_number = helpers.saliency_to_contour(input=saliency_map, original_image=input, fastener_area_threshold=5, input_output_ratio=8)
+    # draw contours on original image and prediction image
+    contour_image, contour_number = helpers.saliency_to_contour(input=saliency_map, original_image=input, fastener_area_threshold=0, input_output_ratio=8)
+    ground_image, ground_number = helpers.saliency_to_contour(input=truth.unsqueeze(0).unsqueeze(0)[..., :1600] * 255, original_image=input, fastener_area_threshold=1, input_output_ratio=1)
+
+    # use this however you want to use it
+    image_image = np.array(cv2.imread(image_path)[..., 0][:, :1600], dtype=np.float64)
+    image_image /= 205 # approximate multiplier, I don't actually know the scale anymore at this point
+    fused_image = np.transpose(np.array([ground_image, contour_image, image_image]), [1, 2, 0])
 
     # set to true to display images
-    if 1:
-        # comparison = truths[2].unsqueeze(0).unsqueeze(0)
-        # figure = plt.figure()
-        # figure.add_subplot(4, 1, 1)
-        # plt.title('Input Image')
-        # plt.imshow(input.squeeze().to('cpu').detach().numpy())
-        # figure.add_subplot(4, 1, 2)
-        # plt.title('Ground Truth')
-        # plt.imshow(comparison.squeeze().to('cpu').detach().numpy())
-        # figure.add_subplot(4, 1, 3)
-        # plt.title('Saliency Map')
-        # plt.imshow(saliency_map.squeeze().to('cpu').detach().numpy())
-        # figure.add_subplot(4, 1, 4)
-        # plt.title('Predictions')
-        plt.imshow(contour_image)
-        plt.title(f'Number of Fasteners in Image: {contour_number}')
+    if True:
+        figure = plt.figure()
 
+        figure.add_subplot(2, 2, 1)
+        plt.title(f'Input Image: Index {index}')
+        plt.imshow(input.squeeze().to('cpu').detach().numpy(), cmap='gray')
+        figure.add_subplot(2, 2, 2)
+        plt.title('Ground Truth')
+        plt.imshow(ground_image, cmap='gray')
+        plt.title(f'Ground Truth Number of Fasteners in Image: {ground_number}')
+        figure.add_subplot(2, 2, 3)
+        plt.title('Saliency Map')
+        plt.imshow(saliency_map.squeeze().to('cpu').detach().numpy(), cmap='gray')
+        figure.add_subplot(2, 2, 4)
+        plt.title('Predictions')
+        plt.imshow(fused_image)
+        plt.title(f'Predicted Number of Fasteners in Image: {contour_number}')
 
         plt.show()
 
 end_time = time.time()
 duration = end_time - start_time
 print(f"Average FPS = {frames_to_render / duration}")
+
