@@ -54,10 +54,10 @@ class helpers:
         if iterations % 100 == 0 and iterations != 0:
             # at the moment, no way to evaluate the current state of training, so we just record the current running loss
             self.lowest_running_loss = (self.running_loss.item() if (iterations == 100 and epoch == 0) else self.lowest_running_loss)
-            
+
             # print status
             print(f'Epoch {epoch}; Batch Number {iterations}; Running Loss {self.running_loss}; Lowest Running Loss {self.lowest_running_loss}')
-            
+
             # record training log
             f = open(os.path.join(self.weights_location, f'weights/Version{self.version_number}/training_log.txt'), "a")
             f.write(f'{epoch}, {iterations}, {self.running_loss}, {self.lowest_running_loss}, {self.mark_number} \n')
@@ -82,7 +82,7 @@ class helpers:
 
             # reset the running loss for the next n batches
             self.running_loss = 0.
-        
+
         # return -1 if we are not returning the weights file
         return -1
 
@@ -135,7 +135,7 @@ class helpers:
         user_input = None
         while user_input != 'Y':
             data, label = dataiter.next()
-            
+
             print(label[0].shape)
             print(data[0].shape)
             plt.imshow(data[0].squeeze())
