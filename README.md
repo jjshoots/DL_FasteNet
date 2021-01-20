@@ -2,7 +2,7 @@
 
 Implementation of FasteNet fastener detection algorithm, scalable to other applications with similar problem structure.
 
-![FasteNet Architecture](FasteNet.png =250x)
+![FasteNet Architecture](FasteNet.png)
 
 Code for the paper:
 
