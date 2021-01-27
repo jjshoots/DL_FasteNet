@@ -4,7 +4,7 @@ Implementation of FasteNet fastener detection algorithm, scalable to other appli
 
 ![FasteNet Architecture](FasteNet.png)
 
-Code for the paper:
+Paper reference:
 
     @article{
         tai2020fastenet,
